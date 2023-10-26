@@ -1,85 +1,86 @@
-async function beerList() {
-    try {
-        const response = await fetch("http://localhost:3000/beers");
-        const list = await response.json();
-        console.log('Data retrieved:', list);
-    } catch (error) {
-        console.error('Beer list not found:', error);
-    }
-  }
+// Fetch all beers and their details from the server when the page loads
+document.addEventListener('DOMContentLoaded', fetchAllBeers);
   
-  //Update beer details
-  function beerDetails (beerList){
-    function checkBeerList(beerList) {
-      const noBeersAvailable = 0;
-    
-      if (beerList === noBeersAvailable) {
-        console.error('Error: Beer list not found');
-      } else {
-        return;
-        
-      }
-    }
-    
-    const beerList = 0;
-    checkBeerList(beerList);
-    }
+// Function to fetch beer details and reviews from the server
+function fetchBeerDetails(beerId) {
+    fetch(`http://localhost:3000/beers ${beerId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Update beer details in the DOM
+        document.getElementById('beer-name').innerText = data.name;
+        document.getElementById('beer-image').src = data.image_url;
+        document.getElementById('beer-image').alt = data.name;
+        document.getElementById('beer-description').innerText = data.description;
   
-  //GET REQUEST ON FIRST BEER
-  const firstBeer = beerList[0];
-  
-  document.getElementById('beer-name').textContent = firstBeer.name
-  document.getElementById('beer-image').src = firstBeer.image_url
-  document.getElementById('beer-description').textContent = firstBeer.description
-  document.getElementById('review-list').textContent = firstBeer.reviews
-  
-  //2 Menu for all beers
-  async function beerList() {
-    try {
-          const response = await fetch("http://localhost:3000/beers");
-          const list = await response.json();
-          beerMenu(list.beers);
-      } catch (error) {
-          return console.error('Error fetching list:', error);
-      }
-  
-  function beerMenu(beers) {
-    const beerMenuDiv = document.getElementById('beer-list');
-  
-    beers.forEach(beer => {                                                                                                                                          
-        const beerDiv = document.createElement('div');
-        beerDiv.classList.add('beer');
-  
-        const beerNameHeading = document.createElement('h2');
-        beerNameHeading.textContent = beer.name;
-  
-        const beerDescription = document.createElement('p');
-        beerDescription.textContent = beer.description;
-  
-        const beerImage = document.createElement('img');
-        beerImage.src = beer.image_url;
-        beerImage.alt = beer.name;
-
-        beerDiv.appendChild(beerNameHeading);
-        beerDiv.appendChild(beerImage);
-        beerDiv.appendChild(beerDescription);
-  
-        beerMenuDiv.appendChild(beerDiv);
+        // Update beer reviews in the DOM
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
+        data.reviews.forEach((review) => {
+          const li = document.createElement('li');
+          li.textContent = review;
+          reviewList.appendChild(li);
+        });
+      })
+      .catch((error) => {
+        console.error('Error fetching beer details:', error);
       });
-  
-  
-  }
   }
   
-
-document.addEventListener('DOMContentLoaded',() =>{
-    fetchBeerList().then((beerList) => {
-        updateBeerDetails(beerList);
-    });
-})
-
-//REVIEW FORM
-const reviewForm = document.getElementById('review-form');
-const reviewsContainer = document.getElementById('reviews-container');
-
-reviewForm.addEventListener('submit')
+  // Function to fetch all beers from the server and update the menu
+  function fetchAllBeers() {
+    fetch('http://localhost:3000/beers')
+      .then((response) => response.json())
+      .then((data) => {
+        // Update beer list in the DOM
+        const beerList = document.getElementById('beer-list');
+        beerList.innerHTML = '';
+        data.forEach((beer) => {
+          const li = document.createElement('li');
+          li.textContent = beer.name;
+          li.addEventListener('click', () => {
+            // When a beer is clicked, fetch and display its details and reviews
+            fetchBeerDetails(beer.id);
+          });
+          beerList.appendChild(li);
+        });
+  
+        // Display details of the first beer by default
+        if (data.length > 0) {
+          fetchBeerDetails(data[0].id);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching beers:', error);
+      });
+  }
+  
+  // Function to handle the review form submission
+  function handleReviewFormSubmit(event) {
+    event.preventDefault();
+    const reviewTextarea = document.getElementById('review');
+    const reviewText = reviewTextarea.value;
+    if (reviewText.trim() !== '') {
+      // Add the new review to the reviews list in the DOM
+      const reviewList = document.getElementById('review-list');
+      const li = document.createElement('li');
+      li.textContent = reviewText;
+      reviewList.appendChild(li);
+      // Clear the review form
+      reviewTextarea.value = '';
+    }
+  }
+  
+  // Function to handle the description form submission
+  function handleDescriptionFormSubmit(event) {
+    event.preventDefault();
+    const descriptionTextarea = document.getElementById('description');
+    const newDescription = descriptionTextarea.value;
+    // Update the beer description in the DOM
+    document.getElementById('beer-description').innerText = newDescription;
+    // Clear the description form
+    descriptionTextarea.value = '';
+  }
+  
+  // Add event listeners for form submissions
+  document.getElementById('review-form').addEventListener('submit', handleReviewFormSubmit);
+  document.getElementById('description-form').addEventListener('submit', handleDescriptionFormSubmit);
