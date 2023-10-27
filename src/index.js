@@ -1,9 +1,10 @@
 // Fetch all beers and their details from the server when the page loads
+const apiBaseUrl = "http://localhost:3000";
 document.addEventListener('DOMContentLoaded', fetchAllBeers);
   
 // Function to fetch beer details and reviews from the server
 function fetchBeerDetails(beerId) {
-    fetch(`http://localhost:3000/beers ${beerId}`)
+    fetch(`${apiBaseUrl}/beers/${beerId}`)
       .then((response) => response.json())
       .then((data) => {
         // Update beer details in the DOM
@@ -28,7 +29,7 @@ function fetchBeerDetails(beerId) {
   
   // Function to fetch all beers from the server and update the menu
   function fetchAllBeers() {
-    fetch('http://localhost:3000/beers')
+    fetch(`${apiBaseUrl}/beers`)
       .then((response) => response.json())
       .then((data) => {
         // Update beer list in the DOM
